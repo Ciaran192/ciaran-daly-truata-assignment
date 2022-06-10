@@ -17,4 +17,4 @@ spark = SparkSession \
 
 #Get the airbnb data
 r = requests.get(url)
-#airbnb =list(map(lambda x:x.split(',') , r.text.strip().split('\n')))
+open('', 'wb').write(r.content)
