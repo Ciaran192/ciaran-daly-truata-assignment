@@ -1,10 +1,10 @@
-#How many people can be accomodated by the property 
-#with the lowest price 
+# How many people can be accomodated by the property
+# with the lowest price
 #and highest rating
 
 from task2_1 import airbnbDF,sqlContext
 
-path = '.\..\out\out2_4.txt'
+path = './../out/out2_4.txt'
 
 airbnbDF.registerTempTable("airbnb_properties");
 

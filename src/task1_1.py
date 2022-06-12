@@ -1,12 +1,7 @@
-#Download the data file from the above location 
+#Download the data file from the above location
 #and make it accessible to Spark
 
-#Get pyspark
-import findspark
-findspark.init()
-
 import requests
-
 from pyspark.sql import SparkSession
 
 #Start spark session
