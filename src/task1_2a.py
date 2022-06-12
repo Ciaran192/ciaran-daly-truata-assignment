@@ -1,10 +1,10 @@
-#Using Spark's RDD API, 
-#create a list of all (unique) products present in the transactions. 
+#Using Spark's RDD API,
+#create a list of all (unique) products present in the transactions.
 #Write out this list to a text file
 
 from task1_1 import shoppingRDD
 
-path = '.\..\out\out1_2a.txt'
+path = './../out/out1_2a.txt'
 
 #Nice one liner,
 #1 Flatten the structure of the RDD,

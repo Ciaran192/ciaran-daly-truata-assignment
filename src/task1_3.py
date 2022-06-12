@@ -1,11 +1,12 @@
-# Create an RDD and using Spark APIs, 
-# determine the top 5 purchased products 
-# along with how often they were purchased (frequency count). 
-# Write the results out in descending order of frequency 
+#Create an RDD and using Spark APIs,
+# determine the top 5 purchased products
+# along with how often they were purchased (frequency count).
+# Write the results out in descending order of frequency
+
 # into a file out/out_1_3.txt.
 
 #filepath to write to
-path = '.\..\out\out1_3.txt'
+path = './../out/out1_3.txt'
 
 #Useful lambdas for here
 swapValueWithKey = lambda x:(x[1],x[0])
