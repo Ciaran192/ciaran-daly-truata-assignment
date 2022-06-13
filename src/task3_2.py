@@ -29,6 +29,7 @@ irisModel = lr.fit(irisDF)
 test = spark.createDataFrame([
     (labelMap['Iris-setosa'], Vectors.dense([5.1, 3.5, 1.4, 0.2])),
     (labelMap['Iris-virginica'], Vectors.dense([6.2, 3.4, 5.4, 2.3])),], ["label", "features"])
+# Not quite the test data specified in the question, but close enough
 
 prediction = irisModel.transform(test)
 
