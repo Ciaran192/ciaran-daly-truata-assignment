@@ -1,60 +1,48 @@
-from pyspark.ml.classification import LogisticRegression
 from pyspark.ml.linalg import Vectors
-from pyspark.ml import Pipeline
-from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler, IndexToString,StringIndexer, VectorIndexer
-from pyspark.sql.functions import col
-from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
-from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+from pyspark.ml.classification import LogisticRegression
 
 from pyspark.sql import SparkSession
 
-
-def get_dummy(df,indexCol,categoricalCols,continuousCols,labelCol):
-
-    indexers = [ StringIndexer(inputCol=c, outputCol="{0}_indexed".format(c))
-                 for c in categoricalCols ]
-
-    # default setting: dropLast=True
-    encoders = [ OneHotEncoder(inputCol=indexer.getOutputCol(),
-                 outputCol="{0}_encoded".format(indexer.getOutputCol()))
-                 for indexer in indexers ]
-
-    assembler = VectorAssembler(inputCols=[encoder.getOutputCol() for encoder in encoders]
-                                + continuousCols, outputCol="features")
-
-    pipeline = Pipeline(stages=indexers + encoders + [assembler])
-
-    model=pipeline.fit(df)
-    data = model.transform(df)
-
-    data = data.withColumn('label',col(labelCol))
-
-    return data.select(indexCol,'features','label')
-
-def transData(data):
-	return data.rdd.map(lambda r: [Vectors.dense(r[:-1]),r[-1]]).toDF(['features','label'])
-
-#Start session
+#Start spark session
 spark = SparkSession \
-    .builder \
-    .appName("Multinomial Logistic Regression") \
+     .builder \
      .master("local[1]") \
-    .getOrCreate()
+     .appName("Ciaran") \
+     .getOrCreate()
 
-# load data
-irisDF = spark.read.csv('tmp/iris.csv')
+labelMap = {
+    'Iris-setosa':0,
+    'Iris-versicolor':1,
+    'Iris-virginica':2
+}
+invLabelMap = {v:k for k,v in labelMap.items()}
 
-transformed = transData(irisDF)
-transformed.show(5)
+irisRDD = spark.sparkContext.textFile('tmp/iris.csv')
+irisRDD = irisRDD.map(lambda x:x.split(','))
+irisRDD = irisRDD.map(lambda x:(labelMap[x[4]],Vectors.dense(*[float(x[0]),float(x[1]),float(x[2]),float(x[3])])))
+irisDF = irisRDD.toDF(['label','features'])
 
-labelIndexer = StringIndexer(inputCol='label',outputCol='indexedLabel').fit(transformed)
-featureIndexer =VectorIndexer(inputCol="features", \
-                              outputCol="indexedFeatures", \
-                              maxCategories=4).fit(transformed)
+lr = LogisticRegression(maxIter=100, regParam=1e-5)
 
-logr = LogisticRegression(featuresCol='indexedFeatures', labelCol='indexedLabel',regParam=1e-5)
-labelConverter = IndexToString(inputCol="prediction", outputCol="predictedLabel",
-	labels=labelIndexer.labels)
-pipeline = Pipeline(stages=[labelIndexer, featureIndexer, logr,labelConverter])
-model = pipeline.fit(trainingData)
+irisModel = lr.fit(irisDF)
 
+test = spark.createDataFrame([
+    (labelMap['Iris-setosa'], Vectors.dense([5.1, 3.5, 1.4, 0.2])),
+    (labelMap['Iris-virginica'], Vectors.dense([6.2, 3.4, 5.4, 2.3])),], ["label", "features"])
+#pred_data = spark.createDataFrame(
+#    [(5.1, 3.5, 1.4, 0.2),
+#    (6.2, 3.4, 5.4, 2.3)],
+#    ["sepal_length", "sepal_width", "petal_length", "petal_width"])
+
+#prediction = irisModel.transform(pred_data.rdd.map(lambda x:Vectors.dense(*[x[0],x[1],x[2],x[3]])).toDF(["features"]))
+#predictionDF = pred_data.rdd.map(lambda x:Vectors.dense(*[x[0],x[1],x[2],x[3]])).toDF(["features"])
+#predictionDF.show()
+#prediction = irisModel.transform(pred_data)
+prediction = irisModel.transform(test)
+
+result = prediction.select("features", "label","prediction")
+predicitedFlowers = [invLabelMap[int(row.prediction)] for row in result.select('prediction').collect()]
+
+with open('../out/out3_2.txt','w') as file:
+    file.write('class\n')
+    file.write('\n'.join(predicitedFlowers))
