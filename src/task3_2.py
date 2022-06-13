@@ -29,15 +29,7 @@ irisModel = lr.fit(irisDF)
 test = spark.createDataFrame([
     (labelMap['Iris-setosa'], Vectors.dense([5.1, 3.5, 1.4, 0.2])),
     (labelMap['Iris-virginica'], Vectors.dense([6.2, 3.4, 5.4, 2.3])),], ["label", "features"])
-#pred_data = spark.createDataFrame(
-#    [(5.1, 3.5, 1.4, 0.2),
-#    (6.2, 3.4, 5.4, 2.3)],
-#    ["sepal_length", "sepal_width", "petal_length", "petal_width"])
 
-#prediction = irisModel.transform(pred_data.rdd.map(lambda x:Vectors.dense(*[x[0],x[1],x[2],x[3]])).toDF(["features"]))
-#predictionDF = pred_data.rdd.map(lambda x:Vectors.dense(*[x[0],x[1],x[2],x[3]])).toDF(["features"])
-#predictionDF.show()
-#prediction = irisModel.transform(pred_data)
 prediction = irisModel.transform(test)
 
 result = prediction.select("features", "label","prediction")
