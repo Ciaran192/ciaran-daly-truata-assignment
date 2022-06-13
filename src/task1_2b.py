@@ -4,6 +4,7 @@
 #Get the RDD
 from task1_1 import shoppingRDD
 
+
 #Path to writ the file to
 path = './../out/out1_2b.txt'
 

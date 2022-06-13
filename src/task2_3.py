@@ -8,6 +8,7 @@
 
 from task2_1 import airbnbDF, sqlContext
 
+
 path = './../out/out2_3.txt'
 
 airbnbDF.registerTempTable("airbnb_properties");
